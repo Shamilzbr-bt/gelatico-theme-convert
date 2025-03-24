@@ -1,0 +1,361 @@
+{% comment %}
+  Footer Component
+  ------------------------------
+  The site footer with multiple sections for navigation, contact, newsletter sign-up
+  
+  Adapted from React component to Shopify Liquid template
+{% endcomment %}
+
+<footer class="site-footer" style="background-color: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}">
+  <div class="page-width py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+      {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#fff5e1"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#ec5c9d"
+    },
+    {%- comment -%} Logo & Description {%- endcomment -%}
+      <div class="lg:col-span-1">
+        <a href="{{ routes.root_url }}" class="inline-block">
+          {%- if section.settings.footer_logo != blank -%}
+            <img 
+              src="{{ section.settings.footer_logo | img_url: 'medium' }}" 
+              alt="{{ shop.name }}"
+              class="h-10 w-auto mb-4"
+              width="{{ section.settings.footer_logo.width }}"
+              height="{{ section.settings.footer_logo.height }}"
+              loading="lazy"
+            >
+          {%- else -%}
+            <h1 class="text-3xl font-bold font-heading text-accent mb-4">
+              {{ shop.name }}
+            </h1>
+          {%- endif -%}
+        </a>
+        <p class="text-body mb-6">
+          {{ section.settings.footer_text }}
+        </p>
+        <div class="flex space-x-4">
+          {%- if section.settings.social_instagram_link != blank -%}
+            <a 
+              href="{{ section.settings.social_instagram_link }}"
+              class="social-icon"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+            >
+              {% render 'icon-instagram' %}
+            </a>
+          {%- endif -%}
+          
+          {%- if section.settings.social_facebook_link != blank -%}
+            <a 
+              href="{{ section.settings.social_facebook_link }}" 
+              class="social-icon"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+            >
+              {% render 'icon-facebook' %}
+            </a>
+          {%- endif -%}
+          
+          {%- if section.settings.social_tiktok_link != blank -%}
+            <a 
+              href="{{ section.settings.social_tiktok_link }}" 
+              class="social-icon"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok"
+            >
+              {% render 'icon-tiktok' %}
+            </a>
+          {%- endif -%}
+          
+          {%- if section.settings.social_snapchat_link != blank -%}
+            <a 
+              href="{{ section.settings.social_snapchat_link }}" 
+              class="social-icon"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Snapchat"
+            >
+              {% render 'icon-snapchat' %}
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} Quick Links {%- endcomment -%}
+      <div class="lg:col-span-1">
+        <h3 class="text-lg font-bold mb-6">{{ section.settings.menu_title | escape }}</h3>
+        <nav class="flex flex-col space-y-3">
+          {%- for link in section.settings.footer_menu.links -%}
+            <a href="{{ link.url }}" class="footer-link">
+              {{ link.title }}
+            </a>
+          {%- endfor -%}
+        </nav>
+      </div>
+
+      {%- comment -%} Contact Info {%- endcomment -%}
+      <div class="lg:col-span-1">
+        <h3 class="text-lg font-bold mb-6">{{ section.settings.contact_title | escape }}</h3>
+        <div class="space-y-4">
+          {%- if section.settings.address != blank -%}
+            <div class="flex items-start space-x-3">
+              {% render 'icon-map-pin' %}
+              <p class="text-body">
+                {{ section.settings.address }}
+              </p>
+            </div>
+          {%- endif -%}
+          
+          {%- if section.settings.phone != blank -%}
+            <div class="flex items-center space-x-3">
+              {% render 'icon-phone' %}
+              <p class="text-body">
+                {{ section.settings.phone }}
+              </p>
+            </div>
+          {%- endif -%}
+          
+          {%- if section.settings.email != blank -%}
+            <div class="flex items-center space-x-3">
+              {% render 'icon-mail' %}
+              <p class="text-body">
+                {{ section.settings.email }}
+              </p>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} Newsletter {%- endcomment -%}
+      <div class="lg:col-span-1">
+        <h3 class="text-lg font-bold mb-6">{{ section.settings.newsletter_title | escape }}</h3>
+        <p class="text-body mb-4">
+          {{ section.settings.newsletter_text }}
+        </p>
+        
+        {%- form 'customer', id: 'ContactFooter', class: 'space-y-3' -%}
+          {%- if form.posted_successfully? -%}
+            <p class="form-success">
+              {{ 'general.newsletter_form.confirmation' | t }}
+            </p>
+          {%- endif -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          
+          <div class="relative">
+            <input 
+              type="email" 
+              name="contact[email]"
+              id="FooterEmail"
+              placeholder="{{ section.settings.newsletter_placeholder | escape }}"
+              class="newsletter-input"
+              required
+            >
+            <button 
+              type="submit" 
+              name="commit"
+              class="newsletter-submit"
+              aria-label="Subscribe"
+            >
+              {% render 'icon-mail' %}
+            </button>
+          </div>
+        {%- endform -%}
+      </div>
+    </div>
+
+    <hr class="border-divider my-12">
+
+    <div class="flex flex-col md:flex-row justify-between items-center">
+      <p class="text-body text-sm mb-4 md:mb-0">
+        &copy; {{ 'now' | date: "%Y" }} {{ shop.name }}. {{ section.settings.copyright_text }}
+      </p>
+      <div class="flex space-x-6">
+        {%- for link in section.settings.footer_legal_menu.links -%}
+          <a href="{{ link.url }}" class="text-sm text-body hover:text-accent transition-colors duration-300">
+            {{ link.title }}
+          </a>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</footer>
+
+{%- comment -%}
+  Icon Partials - These should be created as separate snippets:
+  - icon-instagram.liquid
+  - icon-facebook.liquid
+  - icon-tiktok.liquid
+  - icon-snapchat.liquid
+  - icon-map-pin.liquid
+  - icon-phone.liquid
+  - icon-mail.liquid
+{%- endcomment -%}
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "light",
+          "label": "Light"
+        },
+        {
+          "value": "dark",
+          "label": "Dark"
+        },
+        {
+          "value": "accent",
+          "label": "Accent"
+        }
+      ],
+      "default": "light",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Logo and Branding"
+    },
+    {
+      "type": "image_picker",
+      "id": "footer_logo",
+      "label": "Footer logo"
+    },
+    {
+      "type": "textarea",
+      "id": "footer_text",
+      "label": "Footer text",
+      "default": "Artisanal gelato crafted with passion, bringing a taste of Italy to your doorstep."
+    },
+    {
+      "type": "header",
+      "content": "Quick Links"
+    },
+    {
+      "type": "text",
+      "id": "menu_title",
+      "label": "Menu title",
+      "default": "Quick Links"
+    },
+    {
+      "type": "link_list",
+      "id": "footer_menu",
+      "label": "Footer menu",
+      "default": "footer"
+    },
+    {
+      "type": "header",
+      "content": "Contact Information"
+    },
+    {
+      "type": "text",
+      "id": "contact_title",
+      "label": "Contact title",
+      "default": "Contact Us"
+    },
+    {
+      "type": "textarea",
+      "id": "address",
+      "label": "Address",
+      "default": "Boulevard Mall, Salmiya\nKuwait"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "+965 2221 1234"
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Email address",
+      "default": "hello@gelatico.kw"
+    },
+    {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_title",
+      "label": "Newsletter title",
+      "default": "Newsletter"
+    },
+    {
+      "type": "textarea",
+      "id": "newsletter_text",
+      "label": "Newsletter description",
+      "default": "Sign up for our newsletter to receive updates and special offers."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "Newsletter placeholder text",
+      "default": "Your email address"
+    },
+    {
+      "type": "header",
+      "content": "Social Media Links"
+    },
+    {
+      "type": "url",
+      "id": "social_instagram_link",
+      "label": "Instagram link",
+      "default": "https://www.instagram.com/"
+    },
+    {
+      "type": "url",
+      "id": "social_facebook_link",
+      "label": "Facebook link",
+      "default": "https://www.facebook.com/"
+    },
+    {
+      "type": "url",
+      "id": "social_tiktok_link",
+      "label": "TikTok link",
+      "default": "https://www.tiktok.com/"
+    },
+    {
+      "type": "url",
+      "id": "social_snapchat_link",
+      "label": "Snapchat link",
+      "default": "https://www.snapchat.com/"
+    },
+    {
+      "type": "header",
+      "content": "Bottom Section"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright text",
+      "default": "All rights reserved."
+    },
+    {
+      "type": "link_list",
+      "id": "footer_legal_menu",
+      "label": "Legal links menu",
+      "default": "footer-legal"
+    },
+    {
