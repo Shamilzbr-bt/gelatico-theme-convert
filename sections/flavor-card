@@ -1,0 +1,386 @@
+{% comment %}
+  Flavor Card Snippet
+  ------------------------------
+  A reusable card component for displaying product/flavor items
+  
+  Parameters:
+  - product: The product object to display
+  - layout: 'featured' for featured layout, otherwise uses grid layout
+  - show_buttons: Whether to show action buttons
+{% endcomment %}
+
+{% assign layout_class = layout == 'featured' 
+  ? 'flex flex-col md:flex-row items-start gap-8 my-12 p-6 rounded-3xl bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm shadow-card' 
+  : 'h-full rounded-2xl transition-all duration-300' 
+%}
+
+{% assign image_class = layout == 'featured' 
+  ? 'md:w-[300px] w-full aspect-square md:aspect-auto rounded-xl overflow-hidden' 
+  : 'aspect-square' 
+%}
+
+{% assign content_class = layout == 'featured'
+  ? 'md:flex-1'
+  : 'p-4'
+%}
+
+{% assign first_available_variant = product.variants | where: "available" | first %}
+{% if first_available_variant == blank %}
+  {% assign first_available_variant = product.variants.first %}
+{% endif %}
+
+{% assign current_variant = first_available_variant %}
+{% assign current_price = current_variant.price %}
+{% assign compare_price = current_variant.compare_at_price %}
+
+{% capture product_tags %}
+  {% for tag in product.tags %}
+    {% if tag contains 'flavor:' or tag contains 'type:' %}
+      {% assign clean_tag = tag | remove: 'flavor:' | remove: 'type:' | strip %}
+      <span class="flavor-tag {{ clean_tag | handleize }}">{{ clean_tag }}</span>
+    {% endif %}
+  {% endfor %}
+{% endcapture %}
+
+<div class="flavor-card group {{ layout_class }}" data-product-id="{{ product.id }}">
+  <a href="{{ product.url }}" class="block {% if layout != 'featured' %}h-full w-full{% endif %}">
+    <!-- Product Image with Tags -->
+    <div class="relative overflow-hidden {{ image_class }}">
+      {% if product.featured_image != blank %}
+        <div class="image-wrapper">
+          <img
+            src="{{ product.featured_image | img_url: 'master' }}"
+            alt="{{ product.featured_image.alt | escape | default: product.title }}"
+            class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+            width="{{ product.featured_image.width }}"
+            height="{{ product.featured_image.height }}"
+            loading="lazy"
+          >
+        </div>
+      {% else %}
+        <div class="image-placeholder w-full h-full flex items-center justify-center bg-gray-100">
+          {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-cover' }}
+        </div>
+      {% endif %}
+      
+      <!-- Tags overlay -->
+      <div class="absolute top-3 left-3 max-w-[calc(100%-24px)]">
+        {{ product_tags }}
+      </div>
+    </div>
+    
+    <!-- Product Information -->
+    <div class="{{ content_class }}">
+      <h3 class="heading text-xl font-bold font-heading mb-2 group-hover:text-accent transition-colors duration-300">
+        {{ product.title }}
+      </h3>
+      
+      <p class="text-body-muted mb-3 line-clamp-2">
+        {{ product.description | strip_html | truncatewords: 15 }}
+      </p>
+      
+      <div class="flex items-center justify-between mt-4">
+        <span class="text-lg font-semibold text-accent">
+          {% if compare_price > current_price %}
+            <span class="price-sale">
+              <s class="text-body-muted text-sm mr-2">{{ compare_price | money }}</s>
+              {{ current_price | money }}
+            </span>
+          {% else %}
+            <span class="price">{{ current_price | money }}</span>
+          {% endif %}
+        </span>
+        
+        {% if show_buttons %}
+          <div class="flex items-center space-x-2">
+            {% if layout != 'featured' %}
+              <button class="info-button" 
+                aria-label="View {{ product.title }} details"
+                data-product-modal="{{ product.handle }}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </button>
+            {% endif %}
+            
+            <button class="cart-button"
+              aria-label="Add {{ product.title }} to cart"
+              data-product-add
+              data-variant-id="{{ current_variant.id }}"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </a>
+</div>
+
+<style>
+  .flavor-card {
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+  }
+  
+  .flavor-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .shadow-card {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .flavor-tag {
+    display: inline-block;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+  }
+  
+  .flavor-tag.gelato {
+    background-color: rgba(255, 209, 220, 0.8);
+    color: #d8236a;
+  }
+  
+  .flavor-tag.sorbet {
+    background-color: rgba(167, 199, 231, 0.8);
+    color: #1e65a7;
+  }
+  
+  .text-body-muted {
+    color: #6b7280;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .info-button, .cart-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    transition: all 0.3s ease;
+  }
+  
+  .info-button {
+    background-color: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+  }
+  
+  .info-button:hover {
+    background-color: rgba(255, 209, 220, 0.2);
+  }
+  
+  .cart-button {
+    background-color: var(--color-accent);
+    color: white;
+  }
+  
+  .cart-button:hover {
+    background-color: var(--color-accent-hover, #d8236a);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle add to cart buttons
+    const addToCartButtons = document.querySelectorAll('[data-product-add]');
+    
+    addToCartButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const variantId = this.dataset.variantId;
+        
+        // Add loading state
+        this.classList.add('loading');
+        
+        // Add to cart ajax request
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            id: variantId,
+            quantity: 1
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Update cart count and show notification
+          updateCartCount();
+          
+          // Show success notification
+          showNotification('Success', `${data.title} added to your cart!`, 'success');
+          
+          // Remove loading state
+          this.classList.remove('loading');
+        })
+        .catch(error => {
+          console.error('Error adding to cart:', error);
+          
+          // Show error notification
+          showNotification('Error', 'Could not add item to cart. Please try again.', 'error');
+          
+          // Remove loading state
+          this.classList.remove('loading');
+        });
+      });
+    });
+    
+    // Update cart count in header
+    function updateCartCount() {
+      fetch('/cart.js')
+        .then(response => response.json())
+        .then(cart => {
+          const cartCountElements = document.querySelectorAll('.cart-count');
+          cartCountElements.forEach(element => {
+            element.textContent = cart.item_count;
+          });
+        })
+        .catch(error => console.error('Error fetching cart:', error));
+    }
+    
+    // Simple notification function (you may want to replace this with your theme's toast/notification system)
+    function showNotification(title, message, type) {
+      // Check if there's a notification system in the theme
+      if (window.theme && window.theme.showNotification) {
+        window.theme.showNotification(title, message, type);
+        return;
+      }
+      
+      // Fallback simple notification
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          <h4>${title}</h4>
+          <p>${message}</p>
+        </div>
+        <button class="notification-close">&times;</button>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        notification.classList.add('notification-hide');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 5000);
+      
+      // Close button
+      const closeButton = notification.querySelector('.notification-close');
+      if (closeButton) {
+        closeButton.addEventListener('click', () => {
+          notification.classList.add('notification-hide');
+          setTimeout(() => {
+            notification.remove();
+          }, 300);
+        });
+      }
+    }
+  });
+</script>
+
+<style>
+  /* Basic notification styling */
+  .notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    max-width: 320px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    animation: slide-in 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .notification-success {
+    border-left: 4px solid #4CAF50;
+  }
+  
+  .notification-error {
+    border-left: 4px solid #F44336;
+  }
+  
+  .notification-content {
+    flex: 1;
+  }
+  
+  .notification h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .notification p {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+  }
+  
+  .notification-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #9CA3AF;
+    padding: 0 8px;
+  }
+  
+  .notification-hide {
+    animation: slide-out 0.3s ease forwards;
+  }
+  
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slide-out {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+</style>
