@@ -1,9 +1,85 @@
 <!DOCTYPE html>
 <html lang="{{ shop.locale }}">
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="{{ settings.color_accent }}">
+  <link rel="canonical" href="{{ canonical_url }}">
+
+  <title>
+    {{ page_title }}{% if current_tags %}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}{% endif %}{% if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
+  </title>
+
+  {% if page_description %}
+    <meta name="description" content="{{ page_description | escape }}">
+  {% endif %}
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Theme CSS -->
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+  
+  <!-- CSS for specific features -->
+  {{ 'custom.css' | asset_url | stylesheet_tag }}
+
+  <!-- Theme JS -->
+  <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+
+  <!-- Shopify Required -->
   {{ content_for_header }}
+
+  <style>
+    :root {
+      --color-primary: {{ settings.color_primary }};
+      --color-secondary: {{ settings.color_secondary }};
+      --color-accent: {{ settings.color_accent }};
+      --color-body: {{ settings.color_body_text }};
+      --color-body-bg: {{ settings.color_body_bg }};
+      --font-heading-family: {{ settings.font_heading.family }}, sans-serif;
+      --font-body-family: {{ settings.font_body.family }}, sans-serif;
+    }
+    
+    body {
+      font-family: var(--font-body-family);
+      color: var(--color-body);
+      background-color: var(--color-body-bg);
+    }
+    
+    h1, h2, h3, h4, h5, h6, .heading {
+      font-family: var(--font-heading-family);
+    }
+    
+    .page-width {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .shadow-soft {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+    
+    .shadow-hover:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+  </style>
 </head>
+
 <body>
-  {{ content_for_layout }}
+  <a class="skip-to-content-link visually-hidden" href="#MainContent">
+    {{ 'accessibility.skip_to_text' | t }}
+  </a>
+
+  {% section 'header' %}
+
+  <main id="MainContent" class="main-content" role="main" tabindex="-1">
+    {{ content_for_layout }}
+  </main>
+
+  {% section 'footer' %}
 </body>
 </html>
